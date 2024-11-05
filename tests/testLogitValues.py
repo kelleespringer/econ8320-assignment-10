@@ -19,41 +19,33 @@ for i in code:
         if "#si-exercise" in j:
             exec(compile("".join(i['source']), '<string>', 'exec'))
 
-
-# todo: replace this with an actual test
 class TestCase(unittest.TestCase):
 
     def testLogitCorrectValues(self):
-      data = pd.read_csv("tests/files/assignment8Data.csv")
-      x = data.loc[:100, ['sex','age','educ']]
-      y = data.loc[:100, 'white']
-      reg = RegressionModel(x, y, create_intercept=True, regression_type='logit')
-      reg.fit_model()
+        data = pd.read_csv("tests/files/assignment8Data.csv")
+        x = data.loc[:100, ['sex', 'age', 'educ']]
+        y = data.loc[:100, 'white']
+        reg = RegressionModel(x, y, create_intercept=True, regression_type='logit')
+        reg.fit_model()
 
-      sex = {'coefficient': -1.1229156890097627,
-      'standard_error': 0.39798772782618025,
-      'z_stat': -2.821483202869492,
-      'p_value': 0.004780214077269219}
-      age = {'coefficient': -0.007012518056833769,
-      'standard_error': 0.010835821823286998,
-      'z_stat': -0.6471607019011091,
-      'p_value': 0.5175279421902776}
-      educ = {'coefficient': -0.046485475816343394,
-      'standard_error': 0.10100278092776117,
-      'z_stat': -0.46023956359766527,
-      'p_value': 0.6453442758780246}
-      intercept = {'coefficient': 5.735435005488546,
-      'standard_error': 1.1266207023561843,
-      'z_stat': 5.090830475148922,
-      'p_value': 3.56498650369634e-07}
-      sexEq = (round(sex['coefficient']-reg.results['sex']['coefficient'], 1)==0) & (round(sex['standard_error']-reg.results['sex']['standard_error'], 1)==0) & (round(sex['z_stat']-reg.results['sex']['z_stat'], 1)==0) & (round(sex['p_value']-reg.results['sex']['p_value'], 1)==0)
-      ageEq = (round(age['coefficient']-reg.results['age']['coefficient'], 1)==0) &  (round(age['standard_error']-reg.results['age']['standard_error'], 1)==0) & (round(age['z_stat']-reg.results['age']['z_stat'], 1)==0) & (round(age['p_value']-reg.results['age']['p_value'], 1)==0)
-      educEq = (round(educ['coefficient']-reg.results['educ']['coefficient'], 1)==0) & (round(educ['standard_error']-reg.results['educ']['standard_error'], 1)==0) & (round(educ['z_stat']-reg.results['educ']['z_stat'], 1)==0) & (round(educ['p_value']-reg.results['educ']['p_value'], 1)==0)
-      interceptEq = (round(intercept['coefficient']-reg.results['intercept']['coefficient'], 1)==0) & (round(intercept['standard_error']-reg.results['intercept']['standard_error'], 1)==0) & (round(intercept['z_stat']-reg.results['intercept']['z_stat'], 1)==0) & (round(intercept['p_value']-reg.results['intercept']['p_value'], 1)==0)
-      
-      sexEq2 = (round(sex['coefficient']-reg.results['sex']['coefficient'], 1)==0) & (round(sex['standard_error']-reg.results['sex']['standard_error'], 1)==0) & (round(sex['z_stat']-reg.results['sex']['z_stat'], 1)==0) & (round(sex['p_value']/2-reg.results['sex']['p_value'], 1)==0)
-      ageEq2 = (round(age['coefficient']-reg.results['age']['coefficient'], 1)==0) &  (round(age['standard_error']-reg.results['age']['standard_error'], 1)==0) & (round(age['z_stat']-reg.results['age']['z_stat'], 1)==0) & (round(age['p_value']/2-reg.results['age']['p_value'], 1)==0)
-      educEq2 = (round(educ['coefficient']-reg.results['educ']['coefficient'], 1)==0) & (round(educ['standard_error']-reg.results['educ']['standard_error'], 1)==0) & (round(educ['z_stat']-reg.results['educ']['z_stat'], 1)==0) & (round(educ['p_value']/2-reg.results['educ']['p_value'], 1)==0)
-      interceptEq2 = (round(intercept['coefficient']-reg.results['intercept']['coefficient'], 1)==0) & (round(intercept['standard_error']-reg.results['intercept']['standard_error'], 1)==0) & (round(intercept['z_stat']-reg.results['intercept']['z_stat'], 1)==0) & (round((intercept['p_value']/2-reg.results['intercept']['p_value'], 1)==0))
-      
-      self.assertTrue((sexEq & ageEq & educEq & interceptEq)|(sexEq2 & ageEq2 & educEq2 & interceptEq2), "Your coefficients are not corretly calculated.")
+        # Expected values
+        expected_values = {
+            'sex': {'coefficient': -1.1229, 'standard_error': 0.3980, 'z_stat': -2.8215, 'p_value': 0.00478},
+            'age': {'coefficient': -0.0070, 'standard_error': 0.0108, 'z_stat': -0.6472, 'p_value': 0.5175},
+            'educ': {'coefficient': -0.0465, 'standard_error': 0.1010, 'z_stat': -0.4602, 'p_value': 0.6453},
+            'intercept': {'coefficient': 5.7354, 'standard_error': 1.1266, 'z_stat': 5.0908, 'p_value': 3.56499e-07}
+        }
+
+        # Debug output: print results from the model
+        print("Debug: Model Coefficients:", reg.results.coefficients)
+        print("Debug: Model Standard Errors:", reg.results.standard_errors)
+        print("Debug: Model Z-Statistics:", reg.results.test_statistics)
+        print("Debug: Model P-Values:", reg.results.p_values)
+
+        # Check each variable
+        for var in ['sex', 'age', 'educ', 'intercept']:
+            print(f"Debug: Checking {var}")
+            self.assertAlmostEqual(reg.results.coefficients[var], expected_values[var]['coefficient'], places=4)
+            self.assertAlmostEqual(reg.results.standard_errors[var], expected_values[var]['standard_error'], places=4)
+            self.assertAlmostEqual(reg.results.test_statistics[var], expected_values[var]['z_stat'], places=4)
+            self.assertAlmostEqual(reg.results.p_values[var], expected_values[var]['p_value'], places=4)
